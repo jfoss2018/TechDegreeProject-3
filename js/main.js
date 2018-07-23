@@ -24,6 +24,8 @@ const creditCVVInput = document.getElementById('cvv');
 const beforeLabel = cardNumDiv.nextElementSibling.nextElementSibling.nextElementSibling;
 const paymentSelect = document.getElementById('payment');
 const paymentSelectOptions = paymentSelect.children;
+const zipDiv1 = document.querySelector('.col-3');
+const cvvDiv1 = document.querySelectorAll('.col-3')[1];
 
 // Variable Declaration
 let activitiesTotal = 0;
@@ -56,14 +58,14 @@ emailValid.append(emailValidSpan);
 fieldset1.insertBefore(emailValid, titleLabel);
 
 const paymentDiv = document.createElement('div');
-paymentDiv.className = "col-6";
+paymentDiv.className = "col-6 large";
 paymentDiv.style.display = 'inline-block';
 const paymentSpan = document.createElement('span');
 paymentDiv.append(paymentSpan);
 creditCardDiv.insertBefore(paymentDiv, beforeLabel);
 
 const zipDiv = document.createElement('div');
-zipDiv.className = "col-3 space";
+zipDiv.className = "col-3 space large";
 zipDiv.style.display = 'inline-block';
 const zipSpan = document.createElement('span');
 zipDiv.append(zipSpan);
@@ -96,10 +98,29 @@ const emailTest = /^[\w.]+@[\w.]+\.[com|net|org|edu]{3}$/;
 const creditCardTest = /^\d{13,16}$/;
 const creditCardDigitTest = /[\D]/;
 
-// Global Fuction
+// Global Fuctions
 function textChange(div, span, text, className) {
   span.textContent = text;
   div.className = className;
+}
+
+function checkPosition () {
+  creditCardDiv.removeChild(paymentDiv);
+  creditCardDiv.removeChild(zipDiv);
+  creditCardDiv.removeChild(cvvDiv);
+  if (window.innerWidth < 680) {
+    creditCardDiv.insertBefore(paymentDiv, zipDiv1);
+    creditCardDiv.insertBefore(zipDiv, cvvDiv1);
+    zipDiv.classList.remove('space');
+    creditCardDiv.insertBefore(cvvDiv, beforeLabel);
+    cvvDiv.classList.remove('space');
+  } else {
+    creditCardDiv.insertBefore(paymentDiv, beforeLabel);
+    creditCardDiv.insertBefore(zipDiv, beforeLabel);
+    zipDiv.classList.add('space');
+    creditCardDiv.insertBefore(cvvDiv, beforeLabel);
+    cvvDiv.classList.add('space');
+  }
 }
 
 // This Event Listener shows/hides the "Other Job Title" input element depending
@@ -230,14 +251,14 @@ creditCardInput.addEventListener('keyup', (e) => {
   const digitTest = creditCardDigitTest.test(creditCardInput.value);
   const numTest = creditCardTest.test(creditCardInput.value);
   if (creditCardInput.value === '') {
-    textChange(paymentDiv, paymentSpan, '', 'col-6');
+    textChange(paymentDiv, paymentSpan, '', 'col-6 large');
   } else {
     if (digitTest) {
-      textChange(paymentDiv, paymentSpan, 'Please enter only numeric digits', 'failTest col-6');
+      textChange(paymentDiv, paymentSpan, 'Please enter only numeric digits', 'failTest col-6 large');
     } else if (numTest) {
-      textChange(paymentDiv, paymentSpan, 'Valid Credit Card Number', 'passTest col-6');
+      textChange(paymentDiv, paymentSpan, 'Valid Credit Card Number', 'passTest col-6 large');
     } else {
-      textChange(paymentDiv, paymentSpan, 'Invalid Credit Card Number', 'failTest col-6');
+      textChange(paymentDiv, paymentSpan, 'Invalid Credit Card Number', 'failTest col-6 large');
     }
   }
 });
@@ -293,23 +314,29 @@ pageForm.addEventListener('submit', (e) => {
   if (!creditCardValidTest) {
     textChange(paymentDiv, paymentSpan, 'Invalid Credit Card Number', 'col-6 failTest');
     creditCardInput.style.border = '2px solid red';
+    checkPosition();
   } else {
     textChange(paymentDiv, paymentSpan, '', 'col-6');
     creditCardInput.style.border = 'initial';
+    checkPosition();
   }
   if (!creditZipTest) {
     textChange(zipDiv, zipSpan, 'Invalid zip code', 'failTest col-3 space');
     creditZipInput.style.border = '2px solid red';
+    checkPosition();
   } else {
     textChange(zipDiv, zipSpan, '', 'col-3 space');
     creditZipInput.style.border = 'initial';
+    checkPosition();
   }
   if (!creditCVVValidTest) {
     textChange(cvvDiv, cvvSpan, 'Invalid cvv', 'failTest col-3 space');
     creditCVVInput.style.border = '2px solid red';
+    checkPosition();
   } else {
     textChange(cvvDiv, cvvSpan, '', 'col-3 space');
     creditCVVInput.style.border = 'initial';
+    checkPosition();
   }
   if (paymentSelectOptions[1].selected) {
     if (checkedBoxes.length > 0 && nameValidTest && emailValidTest && creditCardValidTest && creditZipTest && creditCVVValidTest) {
@@ -332,4 +359,9 @@ pageForm.addEventListener('submit', (e) => {
       e.preventDefault();
     }
   }
+});
+
+// This Event Listener repositions credit card error divs when the screen is resized.
+window.addEventListener('resize', () => {
+  checkPosition();
 });
